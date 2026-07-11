@@ -9,7 +9,8 @@ if (!JWT_SECRET) {
 }
 export interface AuthUser{
     id: string,
-    email: string
+    email: string,
+    
 } 
 export function getAuthUser(req :NextRequest) : AuthUser|null{
     try {
@@ -24,5 +25,19 @@ export function getAuthUser(req :NextRequest) : AuthUser|null{
         return decoded as AuthUser;
     } catch (error) {
         return null;
+    }
+}
+
+export function withAuth(handler: Function){
+    return async function (req: NextRequest) {
+        const user =  getAuthUser(req);
+        if(!user){
+            return NextResponse.json(
+                {error : "unauthorized", success: false},
+                {status : 401}
+            )
+        }
+        (req as any ).user = user
+        return handler(req);
     }
 }
