@@ -20,7 +20,7 @@ interface MeResponse {
 export async function GET(req: NextRequest) {
     try {
 
-        const authUser = getAuthUser(req);
+        const authUser =  getAuthUser(req);
         if (!authUser) {
             return NextResponse.json(
                 { error: "Unauthorized", success: false },

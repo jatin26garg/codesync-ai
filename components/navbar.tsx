@@ -4,6 +4,8 @@ import { useRef, useState } from "react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useDispatch } from "react-redux"
+import { setUser } from "@/app/store/userSlice"
 
 interface User {
     id: string;
@@ -29,6 +31,8 @@ export default function Navbar() {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [loading, setloading] = useState(true)
     const [error, seterror] = useState('')
+    const dispatch  = useDispatch()
+    
     useEffect(() => {
         async function checkAuth() {
             try {
@@ -49,6 +53,12 @@ export default function Navbar() {
                 if (data.success && data.user) {
                     setuser(data.user)
                     console.log("$$$$$", data);
+                    dispatch(
+                        setUser({
+                            userId : data.user.id,
+                            name : data.user.name,
+                        })
+                    );
                 }
                 else throw new Error("data not found")
             }
@@ -91,7 +101,7 @@ export default function Navbar() {
                                 <span className="text-white text-xl font-bold">💻</span>
                             </div>
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                CodeSync AI
+                                CodeComunity
                             </span>
                         </Link>
                     </div>

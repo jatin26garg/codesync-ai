@@ -1,5 +1,9 @@
-import mongoose from "mongoose";
 
+import dotenv from "dotenv";
+dotenv.config({
+    path: ".env.local",
+});
+import mongoose from "mongoose";
 const MONGO_URL = process.env.MONGO_URL;
 
 let cachedConnection: typeof mongoose | null = null;

@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.remote-cursor {
+    border-left: 5px solid blue;
+    margin-left: 6px;
+    
+}
+.remote-selction {
+    background: blue;
+}

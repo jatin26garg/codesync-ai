@@ -2,12 +2,15 @@
 
 import React, { useState } from "react"
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 
 export default function login() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl =searchParams.get("redirect");
+
     const [formData, setformData] = useState({
         email: "",
         
@@ -23,7 +26,7 @@ export default function login() {
         setloading(true);
 
         try {
-
+            console.log("😂😂😂`",redirectUrl);
             const res = await fetch("/api/login", {
                 method: "POST",
                 headers: {
@@ -41,8 +44,13 @@ export default function login() {
             }
             console.log("login page is working");
             alert("logein")
+            if(redirectUrl){
+                console.log("😂😂😂`");
+                router.push(redirectUrl)
+                return;
+            }
             router.push("/dashboard");
-            router.refresh();
+           
 
         } catch (error) {
             seterror("login page is wrong")
@@ -137,7 +145,7 @@ export default function login() {
 
                         <p className="text-center text-sm text-gray-600">
                             Don't have an account?{' '}
-                            <Link href="/register" className="text-blue-500 hover:text-blue-700 font-medium transition">
+                            <Link href="/signup" className="text-blue-500 hover:text-blue-700 font-medium transition">
                                 Sign up
                             </Link>
                         </p>

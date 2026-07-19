@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 
 
 
+
 interface LoginRequest {
     email: string,
     password: string
@@ -66,7 +67,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ErrorResponse
     try {
         const body: LoginRequest = await req.json();
         const { email, password } = body;
-
+        
+        const {searchParams} = new URL(req.url);
+        console.log("🥹🥹🥹",new URL(req.url))
         const emailValidation = isValidEmail(email);
 
         if (!emailValidation.valid) {
