@@ -15,6 +15,7 @@ import ChatBox from "@/components/chatBox"
 import { InviteButton } from "@/components/InviteButton"
 import { toast } from "sonner"
 import Terminal from "@/components/terminal"
+import TerminalComponent from "@/components/terminal"
 
 
 interface Project {
@@ -1194,7 +1195,7 @@ export default function ProjectPage() {
                             />
                         </div>
 
-                        <Terminal projectId={projects.id} projectName={projects.name}/>
+                        <TerminalComponent projectId={projects.id} projectName={projects.name}/>
                         
                     </div>
 

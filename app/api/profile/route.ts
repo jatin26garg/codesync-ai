@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import User from "@/Models/User";
 import { mongo } from "@/lib/mongo";
-
-
-
-
 interface MeResponse {
     success: true;
     user: {

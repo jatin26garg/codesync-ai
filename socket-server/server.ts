@@ -11,7 +11,8 @@ dotenv.config({
     path: ".env.local",
 });
 import { mongo } from "../lib/mongo";
-import { getOrCreateTerminal } from "@/lib/terminal";
+import { CreateTerminal, writeTerminal } from "@/lib/terminal";
+
 const httpServer = createServer();
 
 const io = new Server(httpServer, {
@@ -146,7 +147,7 @@ io.on("connection", async (socket) => {
 
         currProjectId = id;
         socket.join(id)
-
+        
         console.log(`${socket.id} joined ${id}`)
 
         if (UserId)
@@ -169,6 +170,20 @@ io.on("connection", async (socket) => {
 
 
         io.to(id).emit("online-members", users)
+
+        const terminal = CreateTerminal(id);
+       
+        terminal.output.on("data",(data :string)=>{
+             console.log("😭😭",data)
+            socket.emit("terminal-output",data);
+        })
+
+        terminal.output.on("exit", (code : number)=>{
+            socket.emit("terminal-exit",code);
+        })
+
+      
+
     })
     socket.on("selction-change", ({ projectId, fileId, selection }) => {
         console.log("selction-change ")
@@ -220,13 +235,10 @@ io.on("connection", async (socket) => {
         io.to(projectId).emit("online-members", user);
 
     })
+   
     socket.on("terminal-input",({projectId, command})=>{
-        const terminal =  getOrCreateTerminal(projectId);
-        
-        console.log("terminal socket 🫡",projectId,command);
-        terminal.onData((data)=>{
-            io.to(projectId).emit("terminal-output", data)
-        })
+       
+        writeTerminal(projectId, command);
     })
     socket.on("disconnect", () => {
 
