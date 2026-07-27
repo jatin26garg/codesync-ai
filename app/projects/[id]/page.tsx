@@ -16,6 +16,12 @@ import { InviteButton } from "@/components/InviteButton"
 import { toast } from "sonner"
 import Terminal from "@/components/terminal"
 import TerminalComponent from "@/components/terminal"
+import CallButton from "@/components/callButton"
+import IncomingCall from "@/components/incomingCall"
+import CallStatus from "@/components/OutgoingCall"
+import OutgoingCall from "@/components/OutgoingCall"
+import CollaborativeEditor from "@/components/CollaborativeEditor"
+
 
 
 interface Project {
@@ -282,7 +288,7 @@ export default function ProjectPage() {
 
 
         const handleCursorUpdate = ({ userId, fileId, position }: RemoteCursor) => {
-            console.log("handleCursorUpdate$$$$$$$$$$$$$$$$$$");
+
 
             setremoteCursor((prev) => {
                 const filtered = prev.filter((cursor) => cursor.userId !== userId);
@@ -319,6 +325,8 @@ export default function ProjectPage() {
             toast.success(`${name} joined the project`)
 
         }
+
+
         socket.on("selection-update", handleSelectionUpdate);
 
         socket.emit("joined", id);
@@ -334,6 +342,8 @@ export default function ProjectPage() {
         socket.on("user-file-changed", handleUserFileChanged)
 
         socket.on("user-joined", handleUserJoined);
+
+
 
 
 
@@ -994,7 +1004,11 @@ export default function ProjectPage() {
 
                 {/* Left Section */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <InviteButton projectId={id} />
+                    <InviteButton projectID={id} />
+
+                    <CallButton projectId={id} onlineUsers={onlineusers} />
+                    <IncomingCall projectId={id} />
+                    <OutgoingCall/>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-blue-400 text-lg">📁</span>
@@ -1184,19 +1198,11 @@ export default function ProjectPage() {
                     <div className="flex-2 flex flex-col h-[95%] overflow-hidden -py-2">
                         {/* Editor */}
                         <div className="flex-1 overflow-hidden relative">
-                            <Editor
-                                height="100%"
-                                className="overflow-y-auto pb-7 pt-0.5"
-                                value={code.length == 0 ? "no code yet" : code}
-                                defaultLanguage={selectedfile?.language}
-                                onChange={handleEditorChange}
-                                onMount={handleEditorMount}
-                                theme="vs-dark"
-                            />
+                          <CollaborativeEditor fileId={selectedfile?.id} projectId={id} initialContent={selectedfile?.content} language={selectedfile?.language}/>
                         </div>
 
-                        <TerminalComponent projectId={projects.id} projectName={projects.name}/>
-                        
+                        <TerminalComponent projectId={projects.id} projectName={projects.name} />
+
                     </div>
 
                     {/* ============ CHAT BOX ============ */}

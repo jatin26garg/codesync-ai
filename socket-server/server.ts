@@ -26,6 +26,7 @@ const projectUsers = new Map<
     string,
     Map<string, { id: string; name: string }>
 >();
+const onlineUsers = new Map();
 
 io.use((socket, next) => {
     try {
@@ -95,6 +96,7 @@ io.on("connection", async (socket) => {
     let currProjectId: string | null = null;
     let UserName: string | any = "Unknown"
     let UserId = socket.data.user?.id;
+    onlineUsers.set(UserId, socket.id);
 
     if (socket.data.user?.id) {
         try {
@@ -147,7 +149,7 @@ io.on("connection", async (socket) => {
 
         currProjectId = id;
         socket.join(id)
-        
+
         console.log(`${socket.id} joined ${id}`)
 
         if (UserId)
@@ -172,17 +174,17 @@ io.on("connection", async (socket) => {
         io.to(id).emit("online-members", users)
 
         const terminal = CreateTerminal(id);
-       
-        terminal.output.on("data",(data :string)=>{
-             console.log("😭😭",data)
-            socket.emit("terminal-output",data);
+
+        terminal.output.on("data", (data: string) => {
+            console.log("😭😭", data)
+            socket.emit("terminal-output", data);
         })
 
-        terminal.output.on("exit", (code : number)=>{
-            socket.emit("terminal-exit",code);
+        terminal.output.on("exit", (code: number) => {
+            socket.emit("terminal-exit", code);
         })
 
-      
+
 
     })
     socket.on("selction-change", ({ projectId, fileId, selection }) => {
@@ -235,10 +237,41 @@ io.on("connection", async (socket) => {
         io.to(projectId).emit("online-members", user);
 
     })
-   
-    socket.on("terminal-input",({projectId, command})=>{
-       
+
+    socket.on("terminal-input", ({ projectId, command }) => {
+
         writeTerminal(projectId, command);
+    })
+    socket.on("call-user", ({ projectId, callerId, callerName, targetUserId, targetUserName }) => {
+        const targetSocketId = onlineUsers.get(targetUserId);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit("incoming-call", {
+                callerId,
+                callerName,
+                callerSocketId: socket.id,
+                projectId
+            });
+        }
+    })
+    socket.on("accept-call", ({ callerId, projectId, callerSocketId }) => {
+        console.log("accepted req in server")
+        io.to(callerSocketId).emit("call-accepted",{reciverSocketId : socket.id})
+    })
+    socket.on("reject-call", ({ callerId, projectId }) => {
+        io.to(callerId).emit("call-rejected")
+    })
+    socket.on("offer", ({ offer, reciverSocketId }) => {
+        io.to(reciverSocketId).emit("offer", { offer, callerId: socket.id })
+    })
+    socket.on("answer", ({ answer, callerId }) => {
+        io.to(callerId).emit("answer", { answer, callerId: socket.id })
+    })
+    socket.on("ice-candidate", ({ candidate, targetId }) => {
+
+        io.to(targetId).emit("ice-candidate", {
+            candidate
+        });
+
     })
     socket.on("disconnect", () => {
 
