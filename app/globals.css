@@ -32,3 +32,10 @@ body {
 .remote-selction {
     background: blue;
 }
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.animate-blink {
+    animation: blink 1s step-end infinite;
+}

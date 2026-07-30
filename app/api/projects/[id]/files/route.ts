@@ -31,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         if (project.ownerId.toString() !== authUser.id) {
             return NextResponse.json(
-                { success: false, error: "Forbidden" },
+                { success: false, error: "only owner can create a new file/folder" },
                 { status: 403 }
             );
         }

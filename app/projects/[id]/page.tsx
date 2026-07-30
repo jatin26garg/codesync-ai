@@ -21,6 +21,7 @@ import IncomingCall from "@/components/incomingCall"
 import CallStatus from "@/components/OutgoingCall"
 import OutgoingCall from "@/components/OutgoingCall"
 import CollaborativeEditor from "@/components/CollaborativeEditor"
+import { io } from "socket.io-client"
 
 
 
@@ -41,7 +42,7 @@ interface resFiles {
     file: fileResponse[],
 }
 
-interface FileNode {
+export interface FileNode {
     id: string;
     name: string;
     parentId: string | null;
@@ -116,6 +117,7 @@ export default function ProjectPage() {
     const [isaving, setisaving] = useState(false)
     const [draggedFile, setdraggedFile] = useState<FileNode | null>(null)
     const [RenameFileId, setRenameFileId] = useState<string | null>(null)
+    const [newFileTrigger, setNewFileTrigger] = useState(0);
 
 
     const [contextmenu, setcontextmenu] = useState({
@@ -145,6 +147,7 @@ export default function ProjectPage() {
     const [messsages, setmesssages] = useState<MessageType[]>([])
     const [sendMessages, setsendMessages] = useState("")
 
+    const [newFile, setnewFile] = useState<any>(null)
 
     useEffect(() => {
         // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
@@ -325,6 +328,7 @@ export default function ProjectPage() {
             toast.success(`${name} joined the project`)
 
         }
+      
 
 
         socket.on("selection-update", handleSelectionUpdate);
@@ -343,10 +347,10 @@ export default function ProjectPage() {
 
         socket.on("user-joined", handleUserJoined);
 
-
-
-
-
+        socket.on("refresh-files", async () => {
+            console.log("fetch filrsppppp😡😡😡😡😡😡😡😡😡😡😡😡");
+        await fetchFiles();  
+    });
 
         return () => {
 
@@ -357,7 +361,7 @@ export default function ProjectPage() {
             socket.off("selection-update", handleSelectionUpdate);
             socket.off("new-message", handleNewMessage)
             socket.off("user-joined", handleUserJoined);
-
+            socket.off("refresh-files");
 
         }
     }, [id, isActive])
@@ -565,7 +569,7 @@ export default function ProjectPage() {
         try {
             setloading(true);
             seterror('');
-            // console.log("checkkkkkkkkkkkkkkkkkkk");
+            // concsole.log("checkkkkkkkkkkkkkkkkkkk");
             const res = await fetch(`/api/projects/${id}/files`,
                 { method: "GET", credentials: "include" }
             )
@@ -861,10 +865,18 @@ export default function ProjectPage() {
 
                 }
             )
+            const data = await res.json();
+            console.log("new file  ------- 👍👍👍👍 ", data.file);
             if (!res.ok) {
-                const data = await res.json();
+                
                 throw new Error(data.error || "Failed to create item");
             }
+
+            socket.emit("file-created",{projectId: id})
+
+            setnewFile(data.file)
+            setNewFileTrigger(prev => prev+1);
+
             setname("");
             setisfolder(false);
             setismodal(false);
@@ -1006,9 +1018,9 @@ export default function ProjectPage() {
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <InviteButton projectID={id} />
 
-                    <CallButton projectId={id} onlineUsers={onlineusers} />
+                    {/* <CallButton projectId={id} onlineUsers={onlineusers} />
                     <IncomingCall projectId={id} />
-                    <OutgoingCall/>
+                    <OutgoingCall /> */}
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-blue-400 text-lg">📁</span>
@@ -1198,7 +1210,14 @@ export default function ProjectPage() {
                     <div className="flex-2 flex flex-col h-[95%] overflow-hidden -py-2">
                         {/* Editor */}
                         <div className="flex-1 overflow-hidden relative">
-                          <CollaborativeEditor fileId={selectedfile?.id} projectId={id} initialContent={selectedfile?.content} language={selectedfile?.language}/>
+                            <CollaborativeEditor
+                                fileId={selectedfile?.id!}
+                                projectId={id}
+                                initialContent={selectedfile?.content}
+                                language={selectedfile?.language}
+                                newFile = {newFile}
+                                newFileTrigger = {newFileTrigger}
+                            />
                         </div>
 
                         <TerminalComponent projectId={projects.id} projectName={projects.name} />

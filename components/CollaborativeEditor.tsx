@@ -4,55 +4,115 @@ import { yjsManager } from "@/lib/yjs";
 import { Editor } from "@monaco-editor/react"
 import { useEffect, useRef, useState } from "react";
 import CursorOverlay from "./CursorOverlay";
-import { useSelector, UseSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import { Rootstate } from "@/app/store/store"
 interface CollaborativeEditorProps {
     fileId: string;
     projectId: string;
-    
+
     initialContent?: string;
     language?: string;
+    newFile: any;
+    newFileTrigger: Number;
 }
 export default function CollaborativeEditor({
     fileId,
     projectId,
     initialContent = '',
-    language = 'typescript'
+    language = 'typescript',
+    newFile,
+    newFileTrigger
 }: CollaborativeEditorProps) {
+    console.log("new file  ------- 👍👍👍👍  666 ", newFile,newFileTrigger);
+    useEffect(() => {
+        console.log("EFFECT TRIGGERED", newFile);
+    }, [newFile, newFileTrigger]);
     const userId = useSelector(
         (state: Rootstate) => state.user.userId
     );
-    const  userName = useSelector(
-        (state: Rootstate) => state.user.userId
+    const userName = useSelector(
+        (state: Rootstate) => state.user.name
     );
 
     const editorRef = useRef<any>(null);
     const [users, setusers] = useState<any[]>([])
     const [isConnected, setisConnected] = useState(false);
     const [isReady, setisReady] = useState(false);
+    const [files, setfiles] = useState([])
     const providerRef = useRef<any>(null);
+    const [isclient, setisclient] = useState(false)
+    const [room, setroom] = useState("")
+    const pendingFileRef = useRef<any>(null);
+    
 
     useEffect(() => {
-        const roomId = `file-${fileId}`;
-        const provider = yjsManager.getProvider(roomId, userId, userName);
-        providerRef.current = provider;
+        setisclient(true);
+    }, [])
 
-        provider.onAwarenessChange((awarenessUsers) => {
-            console.log("AWARENESS USERS:", awarenessUsers);
-            setusers(awarenessUsers);
-        })
 
-        const syncHandler = () => {
-            setisConnected(true);
+    useEffect(() => {
+
+        const initProvider = async () => {
+            const roomId = `project-${projectId}`;
+            setroom(roomId);
+
+            const provider = await yjsManager.getProvider(projectId, roomId, userId!, userName!);
+            providerRef.current = provider;
+
+            // setfiles(provider.getfiles());
+
+            if (newFile) {
+                console.log("is working 0000000000000000")
+                provider.createFile(newFile);
+                newFile = null;
+            }
+
+
+
+
+            provider.onAwarenessChange((awarenessUsers) => {
+                console.log("AWARENESS USERS:", awarenessUsers);
+                setusers(awarenessUsers);
+            })
+            provider.onFilesChange((files) => {
+
+                setfiles(files);
+                console.log("😋😋😋😋😋😋😋", files);
+            })
+            const syncHandler = () => {
+                setisConnected(true);
+            }
+            provider.provider.on('sync', syncHandler);
+
+            setisReady(true);
         }
-        provider.provider.on('sync', syncHandler);
 
-        setisReady(true);
+        initProvider();
 
         return () => {
-            yjsManager.removeProvider(roomId);
+            yjsManager.removeProvider(room);
+            setisConnected(false);
+            setisReady(false);
         }
-    }, [fileId, userId, userName]);
+    }, [projectId, userId, userName]);
+
+
+    useEffect(() => {
+
+        if (!newFile) {
+            console.log("real time update ------- 👍👍👍👍 ");
+
+            console.log(" new file is not ready is getting real time update ------- 👍👍👍👍 ");
+            return;
+        }
+        if (!providerRef.current) {
+            console.log("provider is not redy real time update ------- 👍👍👍👍 ");
+            return;
+        }
+        console.log("new file has arrived  ------- 👍👍👍👍  666 ");
+        providerRef.current.createFile(newFile)
+
+    }, [newFile, newFileTrigger]);
 
     const handleEditorMount = (editor: any) => {
         editorRef.current = editor;
@@ -61,7 +121,7 @@ export default function CollaborativeEditor({
             editor.setValue(initialContent);
         }
         if (providerRef.current) {
-            providerRef.current.bindEditor(editor);
+            providerRef.current.bindEditor(editor, fileId);
         }
     }
     const handleContentChange = (value: string | undefined) => {
@@ -85,9 +145,9 @@ export default function CollaborativeEditor({
 
 
     return (
-        <div className="relative h-full">
+        <div className="relative h-full" suppressHydrationWarning>
 
-            {isReady && (
+            {isclient && isReady && (
                 <div className="relative h-full">
                     <Editor
                         height="100%"
