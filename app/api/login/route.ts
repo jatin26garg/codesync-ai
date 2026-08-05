@@ -2,7 +2,7 @@ import { mongo } from "@/lib/mongo";
 import User from "@/Models/User";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import Jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 
@@ -54,7 +54,7 @@ function getToken(userId: string, email: string) {
     }
     const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
-    return Jwt.sign(
+    return jwt.sign(
         {
             id: userId,
             email: email
