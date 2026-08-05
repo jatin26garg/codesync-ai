@@ -56,7 +56,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         console.log("😡😡😡INVITE API HIT", email);
 
 
-        const isCollaborator = project.collaborators.some((ownerId: any) => ownerId.toString() === user._id.toString());
+        const isCollaborator = project.collaborators.some((ownerId: any) => ownerId.toString() === authUser?.id.toString());
         if (isCollaborator) {
             return NextResponse.json(
                 {
