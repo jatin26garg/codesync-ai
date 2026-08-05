@@ -273,9 +273,16 @@ io.on("connection", async (socket) => {
         });
 
     })
+    
     socket.on("file-created", ({projectId})=>{
         console.log("prject created")
         io.to(projectId).emit("refresh-files");
+    })
+    socket.on("delete-file",({projectId})=>{
+        io.to(projectId).emit("refresh-files")
+    })
+    socket.on("rename-file", ({projectId})=>{
+        io.to(projectId).emit("refresh-files")
     })
     socket.on("disconnect", () => {
 

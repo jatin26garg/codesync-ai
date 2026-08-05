@@ -510,6 +510,7 @@ export default function ProjectPage() {
                 throw new Error("unable to delete");
             }
             alert("file/folder deleted successfully");
+            socket.emit("delete-file",{projectId : id});
             fetchFiles()
         } catch (error) {
             seterror("cant delete")
@@ -759,13 +760,21 @@ export default function ProjectPage() {
                                 setopenedfiles(prev => [...prev, file]);
                             }
                             console.log("openedfies = ", openedfiles)
-                            setselectedfile(file.id)
+                            setselectedfile({
+                                id: file.id,
+                                language : file.language,
+                                content : " ",
+                                createdAt : file.createdAt,
+                                updatedAt : "1",
+                                name : file.name,
+                            });
                             fetchfilecontent(file.id);
                             setisopen(true);
                             handleFileBroadcast(file.id)
 
                         } else {
                             togglefolder(file.id);
+                            setselectedfile(null);
                             setisActive('');
                             setisopen(false);
                         }
@@ -972,6 +981,7 @@ export default function ProjectPage() {
             }
             await fetchFiles();
             alert("file renamed")
+            socket.emit("rename-file",{projectId : id})
             setRenameFileId(null)
             setname("");
         } catch (error) {
@@ -1011,16 +1021,16 @@ export default function ProjectPage() {
     return (
         <div className="h-screen bg-[#121314] text-gray-50 flex flex-col overflow-hidden mx-0">
 
-            {/* ============ TOP BAR ============ */}
+            
             <div className="bg-[#191A1B] text-white flex items-center justify-between border-b px-4 mx-0 border-[#151617] py-2 flex-shrink-0">
 
                 {/* Left Section */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <InviteButton projectID={id} />
 
-                    {/* <CallButton projectId={id} onlineUsers={onlineusers} />
+                    <CallButton projectId={id} onlineUsers={onlineusers} />
                     <IncomingCall projectId={id} />
-                    <OutgoingCall /> */}
+                    <OutgoingCall />
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-blue-400 text-lg">📁</span>
@@ -1089,7 +1099,7 @@ export default function ProjectPage() {
                     </div>
                 </div>
 
-                {/* Right Section */}
+              
                 <div className="flex items-center gap-3 flex-shrink-0">
                     {onlineusers.length !== 0 && (
                         <div className="flex items-center gap-1.5 px-2 py-1 bg-[#1e1e1e] rounded-full">
@@ -1211,7 +1221,7 @@ export default function ProjectPage() {
                         {/* Editor */}
                         <div className="flex-1 overflow-hidden relative">
                             <CollaborativeEditor
-                                fileId={selectedfile?.id!}
+                                fileId={selectedfile?.id}
                                 projectId={id}
                                 initialContent={selectedfile?.content}
                                 language={selectedfile?.language}

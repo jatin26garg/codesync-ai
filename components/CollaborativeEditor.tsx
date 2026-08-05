@@ -147,7 +147,7 @@ export default function CollaborativeEditor({
     return (
         <div className="relative h-full" suppressHydrationWarning>
 
-            {isclient && isReady && (
+            {fileId &&isclient && isReady && (
                 <div className="relative h-full">
                     <Editor
                         height="100%"
