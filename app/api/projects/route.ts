@@ -7,16 +7,16 @@ import mongoose from "mongoose";
 
 
 export interface ProjectResponse {
-    id: string;
-    name: string;
+    id: string,
+    name: string,
     email: string,
-    description: string;
+    description: string,
     owner: {
         id: string,
         name: string,
         email: string,
     },
-    role: string,
+    
     collaborators: {
         id: string,
         name : string,
@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
                     name :collab.name,
                     email : collab.email,
                 })),
-                role: isOwner?"owner":"collaborator",
+                
                 createdAt : project.createdAt,
                 updatedAt : project.updatedAt,
             }
