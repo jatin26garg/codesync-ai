@@ -13,9 +13,9 @@ interface LoginRequest {
     password: string
 }
 interface LoginResponse {
-    success: true,
+    success : boolean,
     message: string,
-    token: string,
+   
     user: {
         id: string,
         name: string,
