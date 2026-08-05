@@ -60,7 +60,7 @@ function getToken(userId: string, email: string) {
             email: email
         },
         JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
+        { expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] }
     )
 }
 export async function POST(req: NextRequest): Promise<NextResponse<ErrorResponse | LoginResponse>> {
