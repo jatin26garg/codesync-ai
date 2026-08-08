@@ -29,6 +29,4 @@ type OnlineUser = {
     name: string;
 };
 
-type 
 
-export function useCollaborationSocket
