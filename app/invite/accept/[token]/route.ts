@@ -5,7 +5,7 @@ import { mongo } from "@/lib/mongo";
 import Invitation from "@/Models/Invitation";
 import Projects from "@/Models/Projects";
 import User from "@/Models/User";
-import { io } from "socket.io-client";
+
 
 export async function GET(req: NextRequest) {
     try {
