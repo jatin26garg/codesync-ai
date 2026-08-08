@@ -21,7 +21,7 @@ import IncomingCall from "@/components/incomingCall"
 import CallStatus from "@/components/OutgoingCall"
 import OutgoingCall from "@/components/OutgoingCall"
 import CollaborativeEditor from "@/components/CollaborativeEditor"
-import { io } from "socket.io-client"
+
 
 
 
