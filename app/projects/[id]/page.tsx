@@ -120,12 +120,17 @@ export default function ProjectPage() {
     const [newFileTrigger, setNewFileTrigger] = useState(0);
 
 
-    const [contextmenu, setcontextmenu] = useState({
+    const [contextMenu, setContextMenu] = useState<{
+        visible: boolean;
+        x: number;
+        y: number;
+        file: FileNode | null;  // ← FileNode or null
+    }>({
         visible: false,
         x: 0,
         y: 0,
-        file: null,
-    })
+        file: null,  // ✅ null is allowed
+    });
     const router = useRouter();
     const params = useParams();
     const [SidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -328,7 +333,7 @@ export default function ProjectPage() {
             toast.success(`${name} joined the project`)
 
         }
-      
+
 
 
         socket.on("selection-update", handleSelectionUpdate);
@@ -349,8 +354,8 @@ export default function ProjectPage() {
 
         socket.on("refresh-files", async () => {
             console.log("fetch filrsppppp😡😡😡😡😡😡😡😡😡😡😡😡");
-        await fetchFiles();  
-    });
+            await fetchFiles();
+        });
 
         return () => {
 
@@ -420,7 +425,7 @@ export default function ProjectPage() {
     }, [code, isopen, selectedfile?.content]);
     useEffect(() => {
         const closeMenu = () => {
-            setcontextmenu((prev) => ({
+            setContextMenu((prev) => ({
                 ...prev, visible: false,
             }))
         }
@@ -502,7 +507,7 @@ export default function ProjectPage() {
         try {
             setloading(true);
             seterror('');
-            const res = await fetch(`/api/files/${contextmenu.file?.id}`,
+            const res = await fetch(`/api/files/${contextMenu.file?.id}`,
                 { method: "DELETE", credentials: "include" }
             )
             const data = await res.json();
@@ -510,13 +515,13 @@ export default function ProjectPage() {
                 throw new Error("unable to delete");
             }
             alert("file/folder deleted successfully");
-            socket.emit("delete-file",{projectId : id});
+            socket.emit("delete-file", { projectId: id });
             fetchFiles()
         } catch (error) {
             seterror("cant delete")
         } finally {
             setloading(false);
-            setcontextmenu({ visible: false, x: 0, y: 0, file: null })
+            setContextMenu({ visible: false, x: 0, y: 0, file: null })
         }
     }
     const fetchdata = async () => {
@@ -762,11 +767,11 @@ export default function ProjectPage() {
                             console.log("openedfies = ", openedfiles)
                             setselectedfile({
                                 id: file.id,
-                                language : file.language,
-                                content : " ",
-                                createdAt : file.createdAt,
-                                updatedAt : "1",
-                                name : file.name,
+                                language: file.language,
+                                content: " ",
+                                createdAt: file.createdAt,
+                                updatedAt: "1",
+                                name: file.name,
                             });
                             fetchfilecontent(file.id);
                             setisopen(true);
@@ -779,7 +784,7 @@ export default function ProjectPage() {
                             setisopen(false);
                         }
                     }}
-                    onContextMenu={(e) => { e.preventDefault(); setcontextmenu({ visible: true, x: e.clientX, y: e.clientY, file: file }) }}
+                    onContextMenu={(e) => { e.preventDefault(); setContextMenu({ visible: true, x: e.clientX, y: e.clientY, file: file }) }}
                 >
 
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -877,14 +882,14 @@ export default function ProjectPage() {
             const data = await res.json();
             console.log("new file  ------- 👍👍👍👍 ", data.file);
             if (!res.ok) {
-                
+
                 throw new Error(data.error || "Failed to create item");
             }
 
-            socket.emit("file-created",{projectId: id})
+            socket.emit("file-created", { projectId: id })
 
             setnewFile(data.file)
-            setNewFileTrigger(prev => prev+1);
+            setNewFileTrigger(prev => prev + 1);
 
             setname("");
             setisfolder(false);
@@ -966,7 +971,7 @@ export default function ProjectPage() {
             setloading(true);
             seterror('');
             if (name.length < 2) return;
-            const res = await fetch(`/api/files/${contextmenu.file.id}`,
+            const res = await fetch(`/api/files/${contextMenu.file?.id}`,
                 {
                     method: "PATCH", headers: {
                         "Content-Type": "application/json",
@@ -981,7 +986,7 @@ export default function ProjectPage() {
             }
             await fetchFiles();
             alert("file renamed")
-            socket.emit("rename-file",{projectId : id})
+            socket.emit("rename-file", { projectId: id })
             setRenameFileId(null)
             setname("");
         } catch (error) {
@@ -1021,7 +1026,7 @@ export default function ProjectPage() {
     return (
         <div className="h-screen bg-[#121314] text-gray-50 flex flex-col overflow-hidden mx-0">
 
-            
+
             <div className="bg-[#191A1B] text-white flex items-center justify-between border-b px-4 mx-0 border-[#151617] py-2 flex-shrink-0">
 
                 {/* Left Section */}
@@ -1099,7 +1104,7 @@ export default function ProjectPage() {
                     </div>
                 </div>
 
-              
+
                 <div className="flex items-center gap-3 flex-shrink-0">
                     {onlineusers.length !== 0 && (
                         <div className="flex items-center gap-1.5 px-2 py-1 bg-[#1e1e1e] rounded-full">
@@ -1220,14 +1225,14 @@ export default function ProjectPage() {
                     <div className="flex-2 flex flex-col h-[95%] overflow-hidden -py-2">
                         {/* Editor */}
                         <div className="flex-1 overflow-hidden relative">
-                            <CollaborativeEditor
+                            {selectedfile?.id && <CollaborativeEditor
                                 fileId={selectedfile?.id}
                                 projectId={id}
                                 initialContent={selectedfile?.content}
                                 language={selectedfile?.language}
-                                newFile = {newFile}
-                                newFileTrigger = {newFileTrigger}
-                            />
+                                newFile={newFile}
+                                newFileTrigger={newFileTrigger}
+                            />}
                         </div>
 
                         <TerminalComponent projectId={projects.id} projectName={projects.name} />
@@ -1350,26 +1355,26 @@ export default function ProjectPage() {
             )}
 
             {/* ============ CONTEXT MENU ============ */}
-            {contextmenu.visible && (
+            {contextMenu.visible && (
                 <div
                     className="fixed z-50 w-56 rounded-lg border border-[#3c3c3c] bg-[#252526] shadow-2xl text-sm text-gray-200 py-1 overflow-hidden"
                     style={{
-                        left: contextmenu.x,
-                        top: contextmenu.y,
+                        left: contextMenu.x,
+                        top: contextMenu.y,
                     }}
                 >
-                    {contextmenu.file?.isFolder && (
+                    {contextMenu.file?.isFolder &&  (
                         <>
                             <button
                                 className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#094771] transition text-left"
-                                onClick={() => { setisfolder(false); setismodal(true); setparentId(contextmenu.file.id) }}
+                                onClick={() => { setisfolder(false); setismodal(true); setparentId(contextMenu.file?.id ?? null) }}
                             >
                                 <span>📄</span>
                                 <span>New File</span>
                             </button>
                             <button
                                 className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#094771] transition text-left"
-                                onClick={() => { setisfolder(true); setismodal(true); setparentId(contextmenu.file.id) }}
+                                onClick={() => { setisfolder(true); setismodal(true); setparentId(contextMenu.file?.id ?? null) }}
                             >
                                 <span>📁</span>
                                 <span>New Folder</span>
@@ -1378,13 +1383,13 @@ export default function ProjectPage() {
                         </>
                     )}
 
-                    <button
+                    {contextMenu.file?.id !== undefined && <button
                         className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#094771] transition text-left"
-                        onClick={() => { setRenameFileId(contextmenu.file.id); setname(contextmenu.file.name) }}
+                        onClick={() => { setRenameFileId(contextMenu.file?.id??null); setname(contextMenu.file?.name ?? "undefined") }}
                     >
                         <span>✏️</span>
                         <span>Rename</span>
-                    </button>
+                    </button>}
 
                     <button
                         className="w-full px-4 py-2 flex items-center gap-3 hover:bg-[#094771] transition text-left text-red-400 hover:text-red-300"

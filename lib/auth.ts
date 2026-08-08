@@ -1,25 +1,29 @@
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import Jwt  from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 
-const JWT_SECRET  = process.env.JWT_SECRET ;
+const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
 }
-export interface AuthUser{
+export interface AuthUser {
     id: string,
     email: string,
-    
-} 
-export function getAuthUser(req :NextRequest) : AuthUser|null{
+
+}
+export function getAuthUser(req: NextRequest): AuthUser | null {
     try {
         const token = req.cookies.get("token")?.value;
-        if(!token){
+        if (!token) {
             return null;
         }
-        const decoded = Jwt.verify(token,JWT_SECRET);
-        if(typeof decoded === "string"){
+        if (!JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined");
+        }
+
+        const decoded = Jwt.verify(token, JWT_SECRET);
+        if (typeof decoded === "string") {
             return null;
         }
         return decoded as AuthUser;
@@ -28,16 +32,16 @@ export function getAuthUser(req :NextRequest) : AuthUser|null{
     }
 }
 
-export function withAuth(handler: Function){
+export function withAuth(handler: Function) {
     return async function (req: NextRequest) {
-        const user =  getAuthUser(req);
-        if(!user){
+        const user = getAuthUser(req);
+        if (!user) {
             return NextResponse.json(
-                {error : "unauthorized", success: false},
-                {status : 401}
+                { error: "unauthorized", success: false },
+                { status: 401 }
             )
         }
-        (req as any ).user = user
+        (req as any).user = user
         return handler(req);
     }
 }

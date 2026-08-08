@@ -14,7 +14,7 @@ export default function TerminalComponent({ projectId, projectName }: { projectI
     const TerminalRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (!TerminalRef) return;
+        if (!TerminalRef.current) return;
         const terminal = new Terminal({
             cursorBlink: true,
             fontSize: 12,

@@ -94,7 +94,9 @@ export class YjsProvider {
     }
 
 
-
+    onSync(callback: () => void) {
+        this.provider.on("sync", callback);
+    }
     async init(projectId: string) {
         await this.initaliseFiles(projectId);
     }

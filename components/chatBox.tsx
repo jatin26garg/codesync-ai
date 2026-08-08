@@ -87,14 +87,14 @@ export default function ChatBox({
                         {msg.userName?.charAt(0).toUpperCase() || 'U'}
                     </div>
 
-                    {/* Message Content */}
+               
                     <div className={`max-w-[80%] ${msg.userId === userId ? 'items-end' : ''}`}>
-                        {/* Name & Time */}
+                       
                         <div className={`text-xs text-gray-400 mb-0.5 ${
                             msg.userId === userId ? 'text-right' : ''
                         }`}>
                             {msg.userId === userId ? 'You' : msg.userName}
-                            <span className="ml-1 text-[10px] text-gray-500">{msg.time}</span>
+                            <span className="ml-1 text-[10px] text-gray-500">{msg.time.toLocaleTimeString()}</span>
                         </div>
 
                         {/* Message Bubble */}

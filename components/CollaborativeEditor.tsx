@@ -82,7 +82,7 @@ export default function CollaborativeEditor({
             const syncHandler = () => {
                 setisConnected(true);
             }
-            provider.provider.on('sync', syncHandler);
+            provider.onSync(syncHandler);
 
             setisReady(true);
         }
